@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:staged": "jest"
   },
   "author": "Iago Rocha Porto",
   "license": "ISC",
