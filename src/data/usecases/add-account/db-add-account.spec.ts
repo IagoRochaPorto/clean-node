@@ -7,19 +7,23 @@ interface SystemUnderTestTypes {
 }
 
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
-  class EncrypterStub {
-    async encrypt(value: string): Promise<string> {
-      return new Promise(resolve => resolve('hashed_password'))
-    }
-  }
-
-  const encrypterStub = new EncrypterStub()
+  const encrypterStub = makeEncrypter()
   const systemUnderTest = new DbAddAccount(encrypterStub)
 
   return {
     systemUnderTest,
     encrypterStub
   }
+}
+
+const makeEncrypter = (): Encrypter => {
+  class EncrypterStub implements Encrypter {
+    async encrypt(value: string): Promise<string> {
+      return new Promise(resolve => resolve('hashed_password'))
+    }
+  }
+
+  return new EncrypterStub()
 }
 
 describe('DbAddAccount Usecase', () => {
