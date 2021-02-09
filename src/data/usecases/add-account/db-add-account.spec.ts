@@ -98,4 +98,20 @@ describe('DbAddAccount Usecase', () => {
     const promise = systemUnderTest.add(accountData)
     await expect(promise).rejects.toThrow()
   })
+
+  test('Should return an Account on success', async () => {
+    const { systemUnderTest } = makeSystemUnderTest()
+    const accountData = {
+      name: 'valid_name',
+      email: 'valid_email',
+      password: 'valid_password'
+    }
+    const account = await systemUnderTest.add(accountData)
+    expect(account).toEqual({
+      id: 'valid_id',
+      name: 'valid_name',
+      email: 'valid_email',
+      password: 'hashed_password'
+    })
+  })
 })
