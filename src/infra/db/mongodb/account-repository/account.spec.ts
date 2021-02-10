@@ -5,8 +5,10 @@ describe('Account Mongo Repository', () => {
   beforeAll(async () => await MongoHelper.connect(process.env.MONGO_URL))
   afterAll(async () => await MongoHelper.disconnect())
 
+  const makeSystemUnderTest = (): AccountMongoRepository => new AccountMongoRepository()
+
   test('Should return an account on success', async () => {
-    const systemUnderTest = new AccountMongoRepository()
+    const systemUnderTest = makeSystemUnderTest()
     const account = await systemUnderTest.add({
       name: 'any_name',
       email: 'any_mail@mail.com',
