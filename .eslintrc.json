@@ -6,6 +6,7 @@
   "rules": {
     "@typescript-eslint/space-before-function-paren": 0,
     "@typescript-eslint/strict-boolean-expressions": 0,
-    "@typescript-eslint/return-await": "off"
+    "@typescript-eslint/return-await": "off",
+    "@typescript-eslint/no-misused-promises": "off"
   }
 }
