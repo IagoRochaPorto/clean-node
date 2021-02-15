@@ -4,7 +4,7 @@ import { AccountMongoRepository } from './account'
 describe('Account Mongo Repository', () => {
   beforeAll(async () => await MongoHelper.connect(process.env.MONGO_URL))
   afterAll(async () => await MongoHelper.disconnect())
-  beforeEach(async () => await MongoHelper.getCollection('account').deleteMany({}))
+  beforeEach(async () => await (await MongoHelper.getCollection('account')).deleteMany({}))
 
   const makeSystemUnderTest = (): AccountMongoRepository => new AccountMongoRepository()
 
