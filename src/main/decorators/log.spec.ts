@@ -43,4 +43,21 @@ describe('LogController Decorator', () => {
     await systemUnderTest.handle(httpRequest)
     expect(handleSpy).toHaveBeenCalledWith(httpRequest)
   })
+
+  test('Should return the same result of the controller', async () => {
+    const { systemUnderTest } = makeSystemUnderTest()
+    const httpRequest = {
+      body: {
+        email: 'any_mail@mail.com',
+        name: 'any_name',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    const httpResponse = await systemUnderTest.handle(httpRequest)
+    expect(httpResponse).toEqual({
+      statusCode: 200,
+      body: { email: 'any_mail@mail.com' }
+    })
+  })
 })
