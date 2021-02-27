@@ -2,6 +2,10 @@ import { Collection } from 'mongodb'
 import { MongoHelper } from '../helpers/mongo-helper'
 import { LogMongoRepository } from './log'
 
+const makeSystemUnderTest = (): LogMongoRepository => {
+  return new LogMongoRepository()
+}
+
 describe('Log Mongo Repository', () => {
   let errorCollection: Collection
 
@@ -13,7 +17,7 @@ describe('Log Mongo Repository', () => {
   })
 
   test('Should create an error log on success', async () => {
-    const systemUnderTest = new LogMongoRepository()
+    const systemUnderTest = makeSystemUnderTest()
     await systemUnderTest.logError('any_error')
     const count = await errorCollection.countDocuments()
     expect(count).toEqual(1)
