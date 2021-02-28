@@ -90,21 +90,6 @@ describe('Signup Controller', () => {
     expect(httpResponse).toEqual(badRequest(new InvalidParamError('email')))
   })
 
-  test('Should return 400 if password confirmation fails', async () => {
-    const { systemUnderTest } = makeSystemUnderTest()
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_invalid_email@mail.com',
-        password: 'any_password',
-        passwordConfirmation: 'any_invalid_password'
-      }
-    }
-
-    const httpResponse = await systemUnderTest.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new InvalidParamError('passwordConfirmation')))
-  })
-
   test('Should return 500 if EmailValidator throws', async () => {
     const { systemUnderTest, emailValidatorStub } = makeSystemUnderTest()
     jest.spyOn(emailValidatorStub, 'isValid').mockImplementationOnce(() => {
