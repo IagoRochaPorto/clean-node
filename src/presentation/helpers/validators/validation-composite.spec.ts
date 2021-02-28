@@ -40,4 +40,10 @@ describe('Validation Composite', () => {
     const error = systemUnderTest.validate({ field: 'any_value' })
     expect(error).toEqual(new Error())
   })
+
+  test('Should not return if validation succeeds', () => {
+    const { systemUnderTest } = makeSystemUnderTest()
+    const error = systemUnderTest.validate({ field: 'any_value' })
+    expect(error).toBeFalsy()
+  })
 })
