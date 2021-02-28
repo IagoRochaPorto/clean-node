@@ -13,24 +13,31 @@ const makeValidation = (): Validation => {
 
 interface SystemUnderTestTypes {
   systemUnderTest: ValidationComposite
-  validationStub: Validation
+  validationStubs: Validation[]
 }
 
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
-  const validationStub = makeValidation()
-  const systemUnderTest = new ValidationComposite([validationStub])
+  const validationStubs = [makeValidation(), makeValidation()]
+  const systemUnderTest = new ValidationComposite(validationStubs)
   return {
     systemUnderTest,
-    validationStub
-
+    validationStubs
   }
 }
 
 describe('Validation Composite', () => {
   test('Should return an error if any validation fails', () => {
-    const { systemUnderTest, validationStub } = makeSystemUnderTest()
-    jest.spyOn(validationStub, 'validate').mockReturnValueOnce(new MissingParamError('field'))
+    const { systemUnderTest, validationStubs } = makeSystemUnderTest()
+    jest.spyOn(validationStubs[1], 'validate').mockReturnValueOnce(new MissingParamError('field'))
     const error = systemUnderTest.validate({ field: 'any_value' })
     expect(error).toEqual(new MissingParamError('field'))
+  })
+
+  test('Should return the first error if more than one validation fails', () => {
+    const { systemUnderTest, validationStubs } = makeSystemUnderTest()
+    jest.spyOn(validationStubs[0], 'validate').mockReturnValueOnce(new Error())
+    jest.spyOn(validationStubs[0], 'validate').mockReturnValueOnce(new MissingParamError('field'))
+    const error = systemUnderTest.validate({ field: 'any_value' })
+    expect(error).toEqual(new Error())
   })
 })
