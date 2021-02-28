@@ -1,3 +1,4 @@
+import { Authentication } from '../../../domain/usecases/authentication'
 import { InvalidParamError, MissingParamError } from '../../errors'
 import { badRequest, serverError } from '../../helpers/http-helper'
 import { EmailValidator, HttpRequest } from '../signup/signup-protocols'
@@ -12,6 +13,15 @@ const makeEmailValidator = (): EmailValidator => {
   return new EmailValidatorStub()
 }
 
+const makeAuthentication = (): Authentication => {
+  class AuthenticationStub implements Authentication {
+    async auth(email: string, password: string): Promise<string> {
+      return new Promise(resolve => resolve('any_token'))
+    }
+  }
+  return new AuthenticationStub()
+}
+
 const makeFakeRequest = (): HttpRequest => ({
   body: {
     email: 'any_email@mail.com',
@@ -21,14 +31,17 @@ const makeFakeRequest = (): HttpRequest => ({
 interface systemUnderTestTypes {
   systemUnderTest: LoginController
   emailValidatorStub: EmailValidator
+  authenticationStub: Authentication
 }
 
 const makeSystemUnderTest = (): systemUnderTestTypes => {
   const emailValidatorStub = makeEmailValidator()
-  const systemUnderTest = new LoginController(emailValidatorStub)
+  const authenticationStub = makeAuthentication()
+  const systemUnderTest = new LoginController(emailValidatorStub, authenticationStub)
   return {
     systemUnderTest,
-    emailValidatorStub
+    emailValidatorStub,
+    authenticationStub
   }
 }
 
@@ -77,5 +90,13 @@ describe('Login Controller', () => {
 
     const httpResponse = await systemUnderTest.handle(makeFakeRequest())
     expect(httpResponse).toEqual(serverError(new Error()))
+  })
+
+  test('Should call Authentication with correct values', async () => {
+    const { systemUnderTest, authenticationStub } = makeSystemUnderTest()
+    const authSpy = jest.spyOn(authenticationStub, 'auth')
+
+    await systemUnderTest.handle(makeFakeRequest())
+    expect(authSpy).toHaveBeenCalledWith('any_email@mail.com', 'any_password')
   })
 })
