@@ -1,5 +1,5 @@
 import { SignupController } from './signup'
-import { ServerError, InvalidParamError, MissingParamError } from '../../errors'
+import { ServerError, MissingParamError } from '../../errors'
 import { EmailValidator, AddAccount, AddAccountModel, AccountModel, Validation } from './signup-protocols'
 import { HttpRequest } from '../../protocols'
 import { ok, serverError, badRequest } from '../../helpers/http-helper'
@@ -57,7 +57,7 @@ const makeSystemUnderTest = (): SystemUnderTestTypes => {
   const emailValidatorStub = makeEmailValidator()
   const addAccountStub = makeAddAccount()
   const validationStub = makeValidation()
-  const systemUnderTest = new SignupController(emailValidatorStub, addAccountStub, validationStub)
+  const systemUnderTest = new SignupController(addAccountStub, validationStub)
 
   return {
     systemUnderTest,
@@ -68,37 +68,6 @@ const makeSystemUnderTest = (): SystemUnderTestTypes => {
 }
 
 describe('Signup Controller', () => {
-  test('Should call EmailValidator with correct email', async () => {
-    const { systemUnderTest, emailValidatorStub } = makeSystemUnderTest()
-    const isValidSpy = jest.spyOn(emailValidatorStub, 'isValid')
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_invalid_email@mail.com',
-        password: 'any_password',
-        passwordConfirmation: 'any_password'
-      }
-    }
-    await systemUnderTest.handle(httpRequest)
-    expect(isValidSpy).toHaveBeenCalledWith('any_invalid_email@mail.com')
-  })
-
-  test('Should return 400 if an invalid email is provided', async () => {
-    const { systemUnderTest, emailValidatorStub } = makeSystemUnderTest()
-    jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
-    const httpResponse = await systemUnderTest.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(badRequest(new InvalidParamError('email')))
-  })
-
-  test('Should return 500 if EmailValidator throws', async () => {
-    const { systemUnderTest, emailValidatorStub } = makeSystemUnderTest()
-    jest.spyOn(emailValidatorStub, 'isValid').mockImplementationOnce(() => {
-      throw new Error()
-    })
-    const httpResponse = await systemUnderTest.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(serverError(new ServerError(null)))
-  })
-
   test('Should call AddAccount with correct values', async () => {
     const { systemUnderTest, addAccountStub } = makeSystemUnderTest()
     const addSpy = jest.spyOn(addAccountStub, 'add')
