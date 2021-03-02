@@ -2,12 +2,13 @@ import { LoadAccountByEmailRepository } from '../../protocols/db/load-account-by
 import { AccountModel } from '../../../domain/models/account'
 import { DbAuthentication } from './db-authentication'
 import { AuthenticationModel } from '../../../domain/usecases/authentication'
+import { HashComparer } from '../../protocols/criptography/hash-comparer'
 
 const makeFakeAccount = (): AccountModel => ({
   id: 'any_id',
   name: 'any_name',
   email: 'any_email@mail.com',
-  password: 'any_password'
+  password: 'hashed_password'
 })
 
 const makeLoadAccountByEmailRepository = (): LoadAccountByEmailRepository => {
@@ -24,18 +25,30 @@ const makeFakeAuthentication = (): AuthenticationModel => ({
   password: 'any_password'
 })
 
+const makeHashComparer = (): HashComparer => {
+  class HashComparerStub implements HashComparer {
+    async compare(password: string, hash: string): Promise<boolean> {
+      return new Promise(resolve => resolve(true))
+    }
+  }
+  return new HashComparerStub()
+}
+
 interface SystemUnderTestTypes {
   systemUnderTest: DbAuthentication
   loadAccountByEmailRepositoryStub: LoadAccountByEmailRepository
+  hashComparerStub: HashComparer
 }
 
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
   const loadAccountByEmailRepositoryStub = makeLoadAccountByEmailRepository()
-  const systemUnderTest = new DbAuthentication(loadAccountByEmailRepositoryStub)
+  const hashComparerStub = makeHashComparer()
+  const systemUnderTest = new DbAuthentication(loadAccountByEmailRepositoryStub, hashComparerStub)
 
   return {
     systemUnderTest,
-    loadAccountByEmailRepositoryStub
+    loadAccountByEmailRepositoryStub,
+    hashComparerStub
   }
 }
 
@@ -59,5 +72,12 @@ describe('DbAuthentication Usecase', () => {
     jest.spyOn(loadAccountByEmailRepositoryStub, 'load').mockReturnValueOnce(null)
     const accessToken = await systemUnderTest.auth(makeFakeAuthentication())
     expect(accessToken).toBe(null)
+  })
+
+  test('Should call HashComparer with correct values', async () => {
+    const { systemUnderTest, hashComparerStub } = makeSystemUnderTest()
+    const compareSpy = jest.spyOn(hashComparerStub, 'compare')
+    await systemUnderTest.auth(makeFakeAuthentication())
+    expect(compareSpy).toHaveBeenCalledWith('any_password', 'hashed_password')
   })
 })
