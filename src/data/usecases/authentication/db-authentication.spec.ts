@@ -125,4 +125,10 @@ describe('DbAuthentication Usecase', () => {
     const promise = systemUnderTest.auth(makeFakeAuthentication())
     await expect(promise).rejects.toThrow()
   })
+
+  test('Should returns a token on success', async () => {
+    const { systemUnderTest } = makeSystemUnderTest()
+    const accessToken = await systemUnderTest.auth(makeFakeAuthentication())
+    expect(accessToken).toBe('any_token')
+  })
 })
