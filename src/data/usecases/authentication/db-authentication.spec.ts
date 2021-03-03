@@ -3,7 +3,7 @@ import {
   AccountModel,
   AuthenticationModel,
   HashComparer,
-  TokenGenerator,
+  Encrypter,
   UpdateAccessTokenRepository
 } from './db-authentication-protocols'
 import { DbAuthentication } from './db-authentication'
@@ -38,13 +38,13 @@ const makeHashComparer = (): HashComparer => {
   return new HashComparerStub()
 }
 
-const makeTokenGenerator = (): TokenGenerator => {
-  class TokenGeneratorStub implements TokenGenerator {
-    async generate(id: string): Promise<string> {
+const makeEncrypter = (): Encrypter => {
+  class EncrypterGeneratorStub implements Encrypter {
+    async encrypt(id: string): Promise<string> {
       return new Promise(resolve => resolve('any_token'))
     }
   }
-  return new TokenGeneratorStub()
+  return new EncrypterGeneratorStub()
 }
 
 const makeUpdateAccessTokenRepository = (): UpdateAccessTokenRepository => {
@@ -60,19 +60,19 @@ interface SystemUnderTestTypes {
   systemUnderTest: DbAuthentication
   loadAccountByEmailRepositoryStub: LoadAccountByEmailRepository
   hashComparerStub: HashComparer
-  tokenGeneratorSub: TokenGenerator
+  encrypterStub: Encrypter
   updateAccessTokenRepositoryStub: UpdateAccessTokenRepository
 }
 
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
   const loadAccountByEmailRepositoryStub = makeLoadAccountByEmailRepository()
   const hashComparerStub = makeHashComparer()
-  const tokenGeneratorSub = makeTokenGenerator()
+  const encrypterStub = makeEncrypter()
   const updateAccessTokenRepositoryStub = makeUpdateAccessTokenRepository()
   const systemUnderTest = new DbAuthentication(
     loadAccountByEmailRepositoryStub,
     hashComparerStub,
-    tokenGeneratorSub,
+    encrypterStub,
     updateAccessTokenRepositoryStub
   )
 
@@ -80,7 +80,7 @@ const makeSystemUnderTest = (): SystemUnderTestTypes => {
     systemUnderTest,
     loadAccountByEmailRepositoryStub,
     hashComparerStub,
-    tokenGeneratorSub,
+    encrypterStub,
     updateAccessTokenRepositoryStub
   }
 }
@@ -128,16 +128,16 @@ describe('DbAuthentication Usecase', () => {
     expect(accessToken).toBeNull()
   })
 
-  test('Should call TokenGenerator with correct id', async () => {
-    const { systemUnderTest, tokenGeneratorSub } = makeSystemUnderTest()
-    const generateSpy = jest.spyOn(tokenGeneratorSub, 'generate')
+  test('Should call Encrypter with correct id', async () => {
+    const { systemUnderTest, encrypterStub } = makeSystemUnderTest()
+    const generateSpy = jest.spyOn(encrypterStub, 'encrypt')
     await systemUnderTest.auth(makeFakeAuthentication())
     expect(generateSpy).toHaveBeenCalledWith('any_id')
   })
 
-  test('Should throw if TokenGenerator throws', async () => {
-    const { systemUnderTest, tokenGeneratorSub } = makeSystemUnderTest()
-    jest.spyOn(tokenGeneratorSub, 'generate').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+  test('Should throw if Encrypter throws', async () => {
+    const { systemUnderTest, encrypterStub } = makeSystemUnderTest()
+    jest.spyOn(encrypterStub, 'encrypt').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
     const promise = systemUnderTest.auth(makeFakeAuthentication())
     await expect(promise).rejects.toThrow()
   })
