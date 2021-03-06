@@ -48,4 +48,19 @@ describe('Account Mongo Repository', () => {
     const account = await systemUnderTest.loadByEmail('any_mail@mail.com')
     expect(account).toBeFalsy()
   })
+
+  test('Should update the account accessToken on updateAccessToken success', async () => {
+    const systemUnderTest = makeSystemUnderTest()
+    const result = await accountCollection.insertOne({
+      name: 'any_name',
+      email: 'any_mail@mail.com',
+      password: 'any_password'
+    })
+    const fakeAccount = result.ops[0]
+    expect(fakeAccount.accessToken).toBeFalsy()
+    await systemUnderTest.updateAccessToken(fakeAccount._id, 'any_token')
+    const account = await accountCollection.findOne({ _id: fakeAccount._id })
+    expect(account).toBeTruthy()
+    expect(account.accessToken).toBeTruthy()
+  })
 })
