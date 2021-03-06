@@ -37,4 +37,10 @@ describe('Bcrypt Adapter', () => {
     await systemUnderTest.compare('any_value', 'any_hash')
     expect(compareSpy).toHaveBeenCalledWith('any_value', 'any_hash')
   })
+
+  test('Should return true when compare success', async () => {
+    const systemUnderTest = makeSystemUnderTest()
+    const isValid = await systemUnderTest.compare('any_value', 'any_hash')
+    expect(isValid).toBe(true)
+  })
 })
