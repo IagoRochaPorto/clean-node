@@ -10,7 +10,7 @@ describe('Login Routes', () => {
   beforeAll(async () => await MongoHelper.connect(process.env.MONGO_URL))
   afterAll(async () => await MongoHelper.disconnect())
   beforeEach(async () => {
-    accountCollection = await MongoHelper.getCollection('account')
+    accountCollection = await MongoHelper.getCollection('accounts')
     return await accountCollection.deleteMany({})
   })
 
@@ -29,7 +29,7 @@ describe('Login Routes', () => {
   })
 
   describe('POST /login', () => {
-    test('Should return an account on login', async () => {
+    test('Should return 200 on login', async () => {
       const password = await hash('123', 12)
       await accountCollection.insertOne({
         name: 'Iago',
@@ -43,6 +43,16 @@ describe('Login Routes', () => {
           password: '123'
         })
         .expect(200)
+    })
+
+    test('Should return 401 on login', async () => {
+      await request(app)
+        .post('/api/login')
+        .send({
+          email: 'iagorochaporto@gmail.com',
+          password: '123'
+        })
+        .expect(401)
     })
   })
 })
