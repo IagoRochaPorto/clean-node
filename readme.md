@@ -106,7 +106,7 @@ Patterns to solve common problems.
 * Deploy on Heroku
 * Serve Static Files
 
-> ## Features do GraphQL
+> ## Features of GraphQL
 
 * Types
 * Queries
