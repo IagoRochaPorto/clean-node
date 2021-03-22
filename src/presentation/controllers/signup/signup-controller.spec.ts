@@ -1,6 +1,6 @@
 import { SignupController } from './signup-controller'
 import { ServerError, MissingParamError } from '../../errors'
-import { EmailValidator, AddAccount, AddAccountModel, AccountModel, Validation } from './signup-controller-protocols'
+import { EmailValidator, AddAccount, AddAccountModel, AccountModel, Validation, Authentication, AuthenticationModel } from './signup-controller-protocols'
 import { HttpRequest } from '../../protocols'
 import { ok, serverError, badRequest } from '../../helpers/http/http-helper'
 
@@ -11,6 +11,15 @@ const makeEmailValidator = (): EmailValidator => {
     }
   }
   return new EmailValidatorStub()
+}
+
+const makeAuthentication = (): Authentication => {
+  class AuthenticationStub implements Authentication {
+    async auth(authentication: AuthenticationModel): Promise<string> {
+      return new Promise(resolve => resolve('any_token'))
+    }
+  }
+  return new AuthenticationStub()
 }
 
 const makeAddAccount = (): AddAccount => {
@@ -51,19 +60,22 @@ interface SystemUnderTestTypes {
   emailValidatorStub: EmailValidator
   addAccountStub: AddAccount
   validationStub: Validation
+  authenticationStub: Authentication
 }
 
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
+  const authenticationStub = makeAuthentication()
   const emailValidatorStub = makeEmailValidator()
   const addAccountStub = makeAddAccount()
   const validationStub = makeValidation()
-  const systemUnderTest = new SignupController(addAccountStub, validationStub)
+  const systemUnderTest = new SignupController(addAccountStub, validationStub, authenticationStub)
 
   return {
     systemUnderTest,
     emailValidatorStub,
     addAccountStub,
-    validationStub
+    validationStub,
+    authenticationStub
   }
 }
 
@@ -108,5 +120,13 @@ describe('Signup Controller', () => {
     jest.spyOn(validationStub, 'validate').mockReturnValueOnce(new MissingParamError('any_field'))
     const httpResponse = await systemUnderTest.handle(makeFakeRequest())
     expect(httpResponse).toEqual(badRequest(new MissingParamError('any_field')))
+  })
+
+  test('Should call Authentication with correct values', async () => {
+    const { systemUnderTest, authenticationStub } = makeSystemUnderTest()
+    const authSpy = jest.spyOn(authenticationStub, 'auth')
+
+    await systemUnderTest.handle(makeFakeRequest())
+    expect(authSpy).toHaveBeenCalledWith({ email: 'valid_email@mail.com', password: 'valid_password' })
   })
 })
