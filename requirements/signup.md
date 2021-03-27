@@ -6,7 +6,7 @@
 2. ✅ Validate required data **name**, **email**, **password** and **passwordConfirmation**
 3. ✅ Ensure **password** and **passwordConfirmation** are equals
 4. ✅ Ensure **email** is a valid email.
-5. ⛔ **Check** if has an user with the provided email.
+5. ✅ **Check** if has an user with the provided email.
 6. ✅ Generate an **encrypted** password (this password cannot be uncrypted)
 7. ✅ **Create** an account for the user with provided data, **replacing** the password with the encrypted passsword.
 8. ✅ Generate an access **token** from the user ID
