@@ -1,17 +1,8 @@
 import { SignupController } from './signup-controller'
-import { ServerError, MissingParamError, EmailInUseError } from '../../errors'
-import { EmailValidator, AddAccount, AddAccountModel, AccountModel, Validation, Authentication, AuthenticationModel } from './signup-controller-protocols'
+import { MissingParamError, EmailInUseError } from '../../errors'
+import { AddAccount, AddAccountModel, AccountModel, Validation, Authentication, AuthenticationModel } from './signup-controller-protocols'
 import { HttpRequest } from '../../protocols'
 import { ok, serverError, badRequest, forbidden } from '../../helpers/http/http-helper'
-
-const makeEmailValidator = (): EmailValidator => {
-  class EmailValidatorStub implements EmailValidator {
-    isValid(email: string): boolean {
-      return true
-    }
-  }
-  return new EmailValidatorStub()
-}
 
 const makeAuthentication = (): Authentication => {
   class AuthenticationStub implements Authentication {
@@ -57,7 +48,6 @@ const makeValidation = (): Validation => {
 }
 interface SystemUnderTestTypes {
   systemUnderTest: SignupController
-  emailValidatorStub: EmailValidator
   addAccountStub: AddAccount
   validationStub: Validation
   authenticationStub: Authentication
@@ -65,14 +55,12 @@ interface SystemUnderTestTypes {
 
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
   const authenticationStub = makeAuthentication()
-  const emailValidatorStub = makeEmailValidator()
   const addAccountStub = makeAddAccount()
   const validationStub = makeValidation()
   const systemUnderTest = new SignupController(addAccountStub, validationStub, authenticationStub)
 
   return {
     systemUnderTest,
-    emailValidatorStub,
     addAccountStub,
     validationStub,
     authenticationStub
@@ -89,16 +77,6 @@ describe('Signup Controller', () => {
       email: 'any_email@mail.com',
       password: 'any_password'
     })
-  })
-
-  test('Should return 500 if EmailValidator throws', async () => {
-    const { systemUnderTest, addAccountStub } = makeSystemUnderTest()
-    jest.spyOn(addAccountStub, 'add').mockImplementationOnce(async () => {
-      return new Promise((resolve, reject) => reject(new Error()))
-    })
-
-    const httpResponse = await systemUnderTest.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(serverError(new ServerError(null)))
   })
 
   test('Should return 403 if AddAccount returns null', async () => {
