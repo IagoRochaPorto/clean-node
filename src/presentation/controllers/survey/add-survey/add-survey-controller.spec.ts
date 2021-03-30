@@ -13,16 +13,34 @@ const makeFakeRequest = (): HttpRequest => ({
   }
 })
 
+const makeValidation = (): Validation => {
+  class ValidationStub implements Validation {
+    validate(input: any): Error {
+      return null
+    }
+  }
+
+  return new ValidationStub()
+}
+
+interface SystemUnderTestTypes {
+  systemUnderTest: AddSurveyController
+  validationStub: Validation
+}
+
+const makeSystemUnderTest = (): SystemUnderTestTypes => {
+  const validationStub = makeValidation()
+  const systemUnderTest = new AddSurveyController(validationStub)
+  return {
+    systemUnderTest,
+    validationStub
+  }
+}
+
 describe('AddSurvey Controller', () => {
   test('Should call Validation with correct values', async () => {
-    class ValidationStub implements Validation {
-      validate(input: any): Error {
-        return null
-      }
-    }
-    const validationStub = new ValidationStub()
+    const { validationStub, systemUnderTest } = makeSystemUnderTest()
     const validateSpy = jest.spyOn(validationStub, 'validate')
-    const systemUnderTest = new AddSurveyController(validationStub)
     const httpRequest = makeFakeRequest()
     await systemUnderTest.handle(httpRequest)
     expect(validateSpy).toHaveBeenCalledWith(httpRequest.body)
