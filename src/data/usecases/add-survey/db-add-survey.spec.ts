@@ -8,17 +8,34 @@ const makeFakeSurveyData = (): AddSurveyModel => ({
   }]
 })
 
+const makeAddSurveyRespositoryStub = (): AddSurveyRepository => {
+  class AddSurveyRepositoryStub implements AddSurveyRepository {
+    async add(surveyData: AddSurveyModel): Promise<void> {
+      return new Promise(resolve => resolve())
+    }
+  }
+
+  return new AddSurveyRepositoryStub()
+}
+
+interface SystemUnderTestTypes {
+  systemUnderTest: DbAddSurvey
+  addSurveyRepositoryStub: AddSurveyRepository
+}
+
+const makeSystemUnderTest = (): SystemUnderTestTypes => {
+  const addSurveyRepositoryStub = makeAddSurveyRespositoryStub()
+  const systemUnderTest = new DbAddSurvey(addSurveyRepositoryStub)
+  return {
+    systemUnderTest,
+    addSurveyRepositoryStub
+  }
+}
+
 describe('DbAddSurvey Usecase', () => {
   test('Should call AddSurveyRepository with correct values', async () => {
-    class AddSurveyRepositoryStub implements AddSurveyRepository {
-      async add(surveyData: AddSurveyModel): Promise<void> {
-        return new Promise(resolve => resolve())
-      }
-    }
-
-    const addSurveyRepositoryStub = new AddSurveyRepositoryStub()
+    const { systemUnderTest, addSurveyRepositoryStub } = makeSystemUnderTest()
     const addSpy = jest.spyOn(addSurveyRepositoryStub, 'add')
-    const systemUnderTest = new DbAddSurvey(addSurveyRepositoryStub)
     const surveyData = makeFakeSurveyData()
     await systemUnderTest.add(surveyData)
     expect(addSpy).toHaveBeenCalledWith(surveyData)
