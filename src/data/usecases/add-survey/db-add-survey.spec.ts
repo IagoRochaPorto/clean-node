@@ -40,4 +40,12 @@ describe('DbAddSurvey Usecase', () => {
     await systemUnderTest.add(surveyData)
     expect(addSpy).toHaveBeenCalledWith(surveyData)
   })
+
+  test('Should call AddSurveyRepository with correct values', async () => {
+    const { systemUnderTest, addSurveyRepositoryStub } = makeSystemUnderTest()
+    jest.spyOn(addSurveyRepositoryStub, 'add').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const surveyData = makeFakeSurveyData()
+    const promise = systemUnderTest.add(surveyData)
+    await expect(promise).rejects.toThrow()
+  })
 })
