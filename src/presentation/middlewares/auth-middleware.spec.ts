@@ -32,9 +32,9 @@ interface SystemUnderTestTypes {
   loadAccountByTokenStub: LoadAccountByToken
 }
 
-const makeSystemUnderTest = (): SystemUnderTestTypes => {
+const makeSystemUnderTest = (role?: string): SystemUnderTestTypes => {
   const loadAccountByTokenStub = makeLoadAccountByToken()
-  const systemUnderTest = new AuthMiddleware(loadAccountByTokenStub)
+  const systemUnderTest = new AuthMiddleware(loadAccountByTokenStub, role)
   return {
     loadAccountByTokenStub,
     systemUnderTest
@@ -49,11 +49,12 @@ describe('Auth Middleware', () => {
   })
 
   test('Should call LoadAccountByToken with correct accessToken', async () => {
-    const { loadAccountByTokenStub, systemUnderTest } = makeSystemUnderTest()
+    const role = 'any_role'
+    const { loadAccountByTokenStub, systemUnderTest } = makeSystemUnderTest(role)
     const loadSpy = jest.spyOn(loadAccountByTokenStub, 'load')
 
     await systemUnderTest.handle(makeFakeRequest())
-    expect(loadSpy).toHaveBeenLastCalledWith('any_token')
+    expect(loadSpy).toHaveBeenLastCalledWith('any_token', role)
   })
 
   test('Should return 403 if LoadAccountByToken returns null', async () => {
