@@ -45,8 +45,15 @@ describe('Jwt Adapter', () => {
 
     test('Should return a value on sign success', async () => {
       const systemUnderTest = makeSystemUnderTest()
-      const accessToken = await systemUnderTest.decrypt('any_id')
+      const accessToken = await systemUnderTest.decrypt('any_token')
       expect(accessToken).toBe('any_value')
+    })
+
+    test('Should throw if sign throws', async () => {
+      const systemUnderTest = makeSystemUnderTest()
+      jest.spyOn(jwt, 'verify').mockImplementationOnce(() => { throw new Error() })
+      const promise = systemUnderTest.decrypt('any_token')
+      await expect(promise).rejects.toThrow()
     })
   })
 })
