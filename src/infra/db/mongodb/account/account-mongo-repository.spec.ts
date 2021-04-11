@@ -69,4 +69,22 @@ describe('Account Mongo Repository', () => {
       expect(account.accessToken).toBeTruthy()
     })
   })
+
+  describe('loadByToken()', () => {
+    test('Should return an account on loadByToken without role success', async () => {
+      const systemUnderTest = makeSystemUnderTest()
+      await accountCollection.insertOne({
+        name: 'any_name',
+        email: 'any_mail@mail.com',
+        password: 'any_password',
+        accessToken: 'any_token'
+      })
+      const account = await systemUnderTest.loadByToken('any_token')
+      expect(account).toBeTruthy()
+      expect(account.id).toBeTruthy()
+      expect(account.name).toBe('any_name')
+      expect(account.email).toBe('any_mail@mail.com')
+      expect(account.password).toBe('any_password')
+    })
+  })
 })
