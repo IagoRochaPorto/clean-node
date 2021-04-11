@@ -42,5 +42,11 @@ describe('Jwt Adapter', () => {
       await systemUnderTest.decrypt('any_token')
       expect(verifySpy).toHaveBeenCalledWith('any_token', 'secret')
     })
+
+    test('Should return a value on sign success', async () => {
+      const systemUnderTest = makeSystemUnderTest()
+      const accessToken = await systemUnderTest.decrypt('any_id')
+      expect(accessToken).toBe('any_value')
+    })
   })
 })
