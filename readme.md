@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.com/IagoRochaPorto/clean-node.svg?branch=main)](https://www.travis-ci.com/IagoRochaPorto/clean-node)
+[![Coverage Status](https://coveralls.io/repos/github/IagoRochaPorto/clean-node/badge.svg)](https://coveralls.io/github/IagoRochaPorto/clean-node)
 # **Clean Node API**
 ## [**Link for the complete course (in portuguese)**](https://www.udemy.com/course/tdd-com-mango/?referralCode=B53CE5CA2B9AFA5A6FA1)
 
