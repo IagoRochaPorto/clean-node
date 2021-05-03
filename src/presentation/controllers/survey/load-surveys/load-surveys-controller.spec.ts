@@ -1,6 +1,7 @@
 import { SurveyModel, LoadSurveys } from './load-surveys-controller-protocols'
 import { LoadSurveysController } from './load-surveys-controller'
 import MockDate from 'mockdate'
+import { ok } from '../../../helpers/http/http-helper'
 
 const makeFakeSurveys = (): SurveyModel[] => {
   return [{
@@ -59,5 +60,12 @@ describe('LoadSurveys controller', () => {
 
     await systemUnderTest.handle({})
     expect(loadSpy).toHaveBeenCalled()
+  })
+
+  test('Should return 200 on success', async () => {
+    const { systemUnderTest } = makeSystemUnderTest()
+
+    const httpResponse = await systemUnderTest.handle({})
+    expect(httpResponse).toEqual(ok(makeFakeSurveys()))
   })
 })
