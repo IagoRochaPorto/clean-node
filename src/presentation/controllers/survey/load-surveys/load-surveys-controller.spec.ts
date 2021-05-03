@@ -26,19 +26,37 @@ const makeFakeSurveys = (): SurveyModel[] => {
   }]
 }
 
+const makeLoadSurveys = (): LoadSurveys => {
+  class LoadSurveysStub implements LoadSurveys {
+    async load(): Promise<SurveyModel[]> {
+      return new Promise(resolve => resolve(makeFakeSurveys()))
+    }
+  }
+
+  return new LoadSurveysStub()
+}
+
+interface SystemUnderTestTypes {
+  systemUnderTest: LoadSurveysController
+  loadSurveysStub: LoadSurveys
+}
+
+const makeSystemUnderTest = (): SystemUnderTestTypes => {
+  const loadSurveysStub = makeLoadSurveys()
+  const systemUnderTest = new LoadSurveysController(loadSurveysStub)
+  return {
+    systemUnderTest,
+    loadSurveysStub
+  }
+}
+
 describe('LoadSurveys controller', () => {
   beforeAll(() => MockDate.set(new Date()))
   afterAll(() => MockDate.reset())
   test('Should call LoadSurveys', async () => {
-    class LoadSurveysStub implements LoadSurveys {
-      async load(): Promise<SurveyModel[]> {
-        return new Promise(resolve => resolve(makeFakeSurveys()))
-      }
-    }
-
-    const loadSurveysStub = new LoadSurveysStub()
+    const { systemUnderTest, loadSurveysStub } = makeSystemUnderTest()
     const loadSpy = jest.spyOn(loadSurveysStub, 'load')
-    const systemUnderTest = new LoadSurveysController(loadSurveysStub)
+
     await systemUnderTest.handle({})
     expect(loadSpy).toHaveBeenCalled()
   })
