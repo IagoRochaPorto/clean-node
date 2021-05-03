@@ -1,14 +1,27 @@
 import { AddSurveyController } from './add-survey-controller'
-import { HttpRequest, Validation, AddSurvey, AddSurveyModel } from './add-survey-controller-protocols'
-import { badRequest, serverError, noContent } from '../../../helpers/http/http-helper'
+import {
+  HttpRequest,
+  Validation,
+  AddSurvey,
+  AddSurveyModel
+} from './add-survey-controller-protocols'
+import {
+  badRequest,
+  serverError,
+  noContent
+} from '../../../helpers/http/http-helper'
+import MockDate from 'mockdate'
 
 const makeFakeRequest = (): HttpRequest => ({
   body: {
     question: 'any_question',
-    answers: [{
-      image: 'any_image',
-      answer: 'any_answer'
-    }]
+    answers: [
+      {
+        image: 'any_image',
+        answer: 'any_answer'
+      }
+    ],
+    date: new Date()
   }
 })
 
@@ -25,7 +38,7 @@ const makeValidation = (): Validation => {
 const makeAddSurvey = (): AddSurvey => {
   class AddSurveyStub implements AddSurvey {
     async add(data: AddSurveyModel): Promise<void> {
-      return new Promise(resolve => resolve())
+      return new Promise((resolve) => resolve())
     }
   }
 
@@ -41,7 +54,10 @@ interface SystemUnderTestTypes {
 const makeSystemUnderTest = (): SystemUnderTestTypes => {
   const validationStub = makeValidation()
   const addSurveyStub = makeAddSurvey()
-  const systemUnderTest = new AddSurveyController(validationStub, addSurveyStub)
+  const systemUnderTest = new AddSurveyController(
+    validationStub,
+    addSurveyStub
+  )
   return {
     systemUnderTest,
     validationStub,
@@ -50,6 +66,9 @@ const makeSystemUnderTest = (): SystemUnderTestTypes => {
 }
 
 describe('AddSurvey Controller', () => {
+  beforeAll(() => MockDate.set(new Date()))
+  afterAll(() => MockDate.reset())
+
   test('Should call Validation with correct values', async () => {
     const { systemUnderTest, validationStub } = makeSystemUnderTest()
     const validateSpy = jest.spyOn(validationStub, 'validate')
@@ -75,7 +94,11 @@ describe('AddSurvey Controller', () => {
 
   test('Should return 500 if AddSurvey throws', async () => {
     const { systemUnderTest, addSurveyStub } = makeSystemUnderTest()
-    jest.spyOn(addSurveyStub, 'add').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    jest
+      .spyOn(addSurveyStub, 'add')
+      .mockReturnValueOnce(
+        new Promise((resolve, reject) => reject(new Error()))
+      )
     const httpResponse = await systemUnderTest.handle(makeFakeRequest())
     expect(httpResponse).toEqual(serverError(new Error()))
   })
