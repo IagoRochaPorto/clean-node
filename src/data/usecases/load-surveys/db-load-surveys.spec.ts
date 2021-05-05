@@ -55,4 +55,11 @@ describe('DbLoadSurveys', () => {
     await systemUnderTest.load()
     expect(loadAllSpy).toHaveBeenCalled()
   })
+
+  test('Should return a list of surveys on success', async () => {
+    const { systemUnderTest } = makeSystemUnderTest()
+
+    const surveys = await systemUnderTest.load()
+    expect(surveys).toEqual(makeFakeSurveys())
+  })
 })
