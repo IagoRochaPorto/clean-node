@@ -26,16 +26,32 @@ const makeFakeSurveys = (): SurveyModel[] => {
   }]
 }
 
+interface SystemUnderTestTypes {
+  systemUnderTest: DbLoadSurveys
+  loadSurveysRepositoryStub: LoadSurveysRepository
+}
+
+const makeLoadSurveysRepository = (): LoadSurveysRepository => {
+  class LoadSurveysRepositoryStub implements LoadSurveysRepository {
+    async loadAll(): Promise<SurveyModel[]> {
+      return new Promise(resolve => resolve(makeFakeSurveys()))
+    }
+  }
+  return new LoadSurveysRepositoryStub()
+}
+
+const makeSystemUnderTest = (): SystemUnderTestTypes => {
+  const loadSurveysRepositoryStub = makeLoadSurveysRepository()
+  const systemUnderTest = new DbLoadSurveys(loadSurveysRepositoryStub)
+
+  return { systemUnderTest, loadSurveysRepositoryStub }
+}
+
 describe('DbLoadSurveys', () => {
   test('Should call LoadSurveysRepository', async () => {
-    class LoadSurveysRepositoryStub implements LoadSurveysRepository {
-      async loadAll(): Promise<SurveyModel[]> {
-        return new Promise(resolve => resolve(makeFakeSurveys()))
-      }
-    }
-    const loadSurveysRepositoryStub = new LoadSurveysRepositoryStub()
+    const { systemUnderTest, loadSurveysRepositoryStub } = makeSystemUnderTest()
     const loadAllSpy = jest.spyOn(loadSurveysRepositoryStub, 'loadAll')
-    const systemUnderTest = new DbLoadSurveys(loadSurveysRepositoryStub)
+
     await systemUnderTest.load()
     expect(loadAllSpy).toHaveBeenCalled()
   })
