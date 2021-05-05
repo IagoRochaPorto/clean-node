@@ -4,7 +4,8 @@
 
 1. ⛔ Receive a **GET** requisition in route **/api/surveys**
 2. ⛔ Ensure if the requistion was made by an user
-3. ⛔ Returns 200 with the poll data
+3. ⛔ Returns 204 if there is no content
+4. ⛔ Returns 200 with the poll data
 
 ## Exceptions
 
